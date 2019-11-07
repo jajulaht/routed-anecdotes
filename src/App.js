@@ -4,22 +4,35 @@ import {
   Route, Link, Redirect, withRouter
 } from 'react-router-dom'
 
-const Menu = ({ anecdotes, anecdoteById }) => {
+const Menu = ({
+  anecdotes,
+  anecdoteById,
+  addNew,
+  showForm,
+  setShowForm,
+  setNotification,
+  notification }) => {
   const padding = {
     paddingRight: 5
   }
   return (
+    <div>
       <div>
-        <div>
-          <Link style={padding} to="/">anecdotes</Link>
-          <Link style={padding} to="/create">create new</Link>
-          <Link style={padding} to="/about">about</Link>
-        </div>
-        <Route exact path="/" render={() => <AnecdoteList anecdotes={anecdotes} />} />
-        <Route exact path="/anecdotes/:id" render={({ match }) => <Anecdote anecdote={anecdoteById(match.params.id)} />} />
-        <Route path="/create" render={() => <CreateNew />} />
-        <Route path="/about" render={() => <About />} />
+        <Link style={padding} to="/">anecdotes</Link>
+        <Link style={padding} to="/create">create new</Link>
+        <Link style={padding} to="/about">about</Link>
       </div>
+      <Route exact path="/" render={() =>
+        <>
+        <Notification notification={notification} />
+        <AnecdoteList anecdotes={anecdotes} />
+        </>}
+      />
+      <Route exact path="/anecdotes/:id" render={({ match }) => <Anecdote anecdote={anecdoteById(match.params.id)} />} />
+      <Route path="/create" render={() =>
+        showForm ? <CreateNew addNew={addNew} setShowForm={setShowForm} setNotification={setNotification} /> : <Redirect to="/" />} />
+      <Route path="/about" render={() => <About />} />
+    </div>
   )
 }
 
@@ -27,7 +40,7 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => 
+      {anecdotes.map(anecdote =>
         <li key={anecdote.id} >
           <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link>
         </li>
@@ -52,7 +65,7 @@ const About = () => (
     <em>An anecdote is a brief, revealing account of an individual person or an incident.
       Occasionally humorous, anecdotes differ from jokes because their primary purpose is not simply to provoke laughter but to reveal a truth more general than the brief tale itself,
       such as to characterize a person by delineating a specific quirk or trait, to communicate an abstract idea about a person, place, or thing through the concrete details of a short narrative.
-      An anecdote is "a story with a point."</em>
+      An anecdote is &quot;a story with a point.&quot;</em>
 
     <p>Software engineering is full of excellent anecdotes, at this app you can find the best and add more.</p>
   </div>
@@ -71,7 +84,6 @@ const CreateNew = (props) => {
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
 
-
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
@@ -80,6 +92,11 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+    props.setShowForm(false)
+    props.setNotification(`A new anecdote '${content}' was added`)
+    setTimeout(() => {
+      props.setNotification('')
+    }, 10000)
   }
 
   return (
@@ -102,7 +119,13 @@ const CreateNew = (props) => {
       </form>
     </div>
   )
+}
 
+const Notification = (props) => {
+  if (props.notification.length !== 0)
+    return <p>{ props.notification }</p>
+  else
+    return null
 }
 
 const App = () => {
@@ -122,7 +145,7 @@ const App = () => {
       id: '2'
     }
   ])
-
+  const [showForm, setShowForm] = useState(true)
   const [notification, setNotification] = useState('')
 
   const addNew = (anecdote) => {
@@ -148,7 +171,15 @@ const App = () => {
     <div>
       <Router>
         <h1>Software anecdotes</h1>
-        <Menu anecdotes={anecdotes} anecdoteById={anecdoteById} />
+        <Menu
+          anecdotes={anecdotes}
+          anecdoteById={anecdoteById}
+          addNew={addNew}
+          showForm={showForm}
+          setShowForm={setShowForm}
+          notification={notification}
+          setNotification={setNotification}
+        />
       </Router>
       <Footer />
     </div>
