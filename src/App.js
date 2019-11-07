@@ -4,12 +4,11 @@ import {
   Route, Link, Redirect, withRouter
 } from 'react-router-dom'
 
-const Menu = ({ anecdotes }) => {
+const Menu = ({ anecdotes, anecdoteById }) => {
   const padding = {
     paddingRight: 5
   }
   return (
-    <Router>
       <div>
         <div>
           <Link style={padding} to="/">anecdotes</Link>
@@ -17,10 +16,10 @@ const Menu = ({ anecdotes }) => {
           <Link style={padding} to="/about">about</Link>
         </div>
         <Route exact path="/" render={() => <AnecdoteList anecdotes={anecdotes} />} />
+        <Route exact path="/anecdotes/:id" render={({ match }) => <Anecdote anecdote={anecdoteById(match.params.id)} />} />
         <Route path="/create" render={() => <CreateNew />} />
         <Route path="/about" render={() => <About />} />
       </div>
-    </Router>
   )
 }
 
@@ -28,8 +27,20 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id} >{anecdote.content}</li>)}
+      {anecdotes.map(anecdote => 
+        <li key={anecdote.id} >
+          <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link>
+        </li>
+      )}
     </ul>
+  </div>
+)
+
+const Anecdote = ({ anecdote }) => (
+  <div>
+    <h2>{anecdote.content}</h2>
+    <p>has {anecdote.votes} votes</p>
+    <p>For more info see <a href={anecdote.info}>{anecdote.info}</a></p>
   </div>
 )
 
@@ -135,14 +146,13 @@ const App = () => {
 
   return (
     <div>
-      <h1>Software anecdotes</h1>
-      <Menu anecdotes={anecdotes} />
-      <AnecdoteList anecdotes={anecdotes} />
-      <About />
-      <CreateNew addNew={addNew} />
+      <Router>
+        <h1>Software anecdotes</h1>
+        <Menu anecdotes={anecdotes} anecdoteById={anecdoteById} />
+      </Router>
       <Footer />
     </div>
   )
 }
 
-export default App;
+export default App
