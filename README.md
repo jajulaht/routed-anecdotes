@@ -1,4 +1,4 @@
-## Exercises for the Fullstack Open 2019 course part 7
+## Exercises for the Fullstack Open 2019 course, part 7
 
 Course page can be found [here](https://fullstackopen.com/en/part7).
 
